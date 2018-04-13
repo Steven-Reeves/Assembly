@@ -40,8 +40,8 @@ main:
     // Add for debugging
     addu t4, t1, t3
     
-    outer_loop_end:
-
+outer_loop_end:
+			    
 endless:		    // Added for debugging
     j endless
     nop
