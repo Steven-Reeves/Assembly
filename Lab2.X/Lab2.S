@@ -14,9 +14,10 @@
 
 .data
 			    // Part 1 here:
-    X: .word 1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,1	    // array of 9
-    Y: .word 1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,1	    // array of 9 
-    MAC_ACC: .word 0	    // Should be result of addition	
+    X: .word 1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,1	    // array of 20
+    Y: .word 1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,1	    // array of 20 
+    MAC_ACC: .word 0	    // Should be result of multiplication 
+			    // Current values = 572(DEC) or 23C(HEX)
     N: .word 20		    // 20 elements in array
 .text
 .set noreorder
@@ -48,10 +49,9 @@ inner_loop_begin:
     
 inner_loop_end:
     lw	s4, 0(s3)
-    add s4, s4, t9	    //Add result to s3 save MAC_ACC everytime
-    sw	s4, 0(s3)
+    add s4, s4, t9	    //Add result to s4
+    sw	s4, 0(s3)	    //Store value at MAC_ACC
     li	t9, 0		    //Clear t9 for next inner loop
-    // TODO: increase offset
     addiu t2, t2, -1	    // N--
     beqz t2, outer_loop_end //if t2 (or N) is 0, skip to end
     nop
