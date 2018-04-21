@@ -19,11 +19,11 @@
 // RPN: 3 4 * 5 6 - + =
 EXPR:	.word  3
             .word  4
+            .word  0x80000000 + '*'
+            .word  5
+            .word  6
+            .word  0x80000000 + '-'
             .word  0x80000000 + '+'
-//            .word  5
- //           .word  6
-//            .word  0x80000000 + '-'
-//            .word  0x80000000 + '+'
             .word  0x80000000 + '='
 RESULT:	    .word 0	    // Should be result of entire expression 
 
@@ -77,11 +77,14 @@ loop_begin:
     beq s7, s3, MULT_THINGS	// Go to MULT_THINGS
     nop
 
-    beq s7, s4, EQUALS	// Go to EQUALS
+    beq s7, s4, EQUALS		// Go to EQUALS
     nop
 
     push s7			// Not expression, push stuff on
     addiu s0, s0, 4		// EXPR[i++]
+
+    j	loop_begin
+    nop
     // if digit, push
 	// Add 4 bytes to EXPR
 	// Jump to read EXPR
@@ -90,8 +93,7 @@ loop_begin:
 	// Add 4 bytes to EXPR
 	// Jump to read EXPR
     // if '=' pop last thing off and store
-    j	loop_begin
-    nop
+
 
 ADD_THINGS:
     pop t0
@@ -104,14 +106,40 @@ ADD_THINGS:
     nop
 
 SUB_THINGS:
-    // sub stuff here
+    pop t0
+    pop t1
+    subu t3, t1, t0
+    push t3
+
+    addiu s0, s0, 4		// EXPR[i++]
+    j	loop_begin
+    nop
 
 MULT_THINGS:
-    // mult stuff here
+    pop t0
+    pop t1
+    //check to see if X or Y are zero, if so, run away.
+    beqz t0, inner_loop_end //if X is zero
+    nop
+    beqz t1, inner_loop_end //if Y is zero
+    nop
+    addu t9, zero, zero //clear the temp
+inner_loop:
+    addu t9, t9, t0  //temp = temp + X
+    addiu t1, t1, -1  //y--
+//if y == 0, then the multiplication operation is complete
+    bnez t1, inner_loop
+    nop
+inner_loop_end:
+
+    push t9
+    addiu s0, s0, 4		// EXPR[i++]
+    j	loop_begin
+    nop
 
 EQUALS:	
     pop t0
-    sw t0, 0(s5)
+    sw t0, 0(s5)	    // Put value at t0 into address at s5 (RESULT)
     j endless
     nop
 
