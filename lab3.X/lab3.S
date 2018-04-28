@@ -88,7 +88,7 @@ loop_begin:
     // if digit, push
 	// Add 4 bytes to EXPR
 	// Jump to read EXPR
-    // if expressionn not equal
+    // if expression not equal
 	// Pop 2 values from stack and do stuff
 	// Add 4 bytes to EXPR
 	// Jump to read EXPR

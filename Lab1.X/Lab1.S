@@ -8,59 +8,56 @@
 .global main
  
 .data
-// data segment for READ/WRITE data follows here
+
+   Hat: .word 0xffffffff
+   MyArray: .space 16
+   MyVar: .word 0x1234abcd
+   MyByte: .byte 0xff
+   //str: .byte 1,2,3,4,5,6,7,0
+   //COUNT: .word 0
 // stored in volatile RAM memory
- 
-EXPR:  .word  3
-            .word  4
-            .word  0x80000000 + '*'
-            .word  5
-            .word  6
-            .word  0x80000000 + '-'
-            .word  0x80000000 + '+'
-            .word  0x80000000 + '='
- 
+// 
 .text
-.macro push reg
-    addiu sp, sp, -4
-    sw  \reg, 0(sp)
-.endm
- 
-.macro pop reg
-    lw \reg, 0(sp)
-    addiu sp, sp, 4
-.endm
- 
-// After all code in the .text segment (bottom of file)
-MULT_OP:  .word 0x80000000 + '*'
-ADD_OP:   .word 0x80000000 + '+'
-SUB_OP:   .word 0x80000000 + '-'
-EQU_OP:   .word 0x80000000 + '='
-   
- 
+//.macro push reg
+//    addiu sp, sp, -4
+//    sw  \reg, 0(sp)
+//.endm
+// 
+//.macro pop reg
+//    lw \reg, 0(sp)
+//    addiu sp, sp, 4
+//.endm
+//
+//   
+// 
 .set noreorder
-// text segment for instructions and CONSTANT READ-ONLY data follows here
-// stored in non-volatile flash memory
- 
-   
+//// text segment for instructions and CONSTANT READ-ONLY data follows here
+//// stored in non-volatile flash memory
+// 
+//   
 .ent main
 main:
- 
-    // instructions go here
-    la s0, EXPR
-    lw t0, 0(s0)
-    lw t1, 4(s0)
-    lw t2, 8(s0)
-    lw t3, 12(s0)
-    lw t4, 16(s0)
-   
-    push t0
-    push t1
-    push t2
-    push t3
-    push t4
-   
-    endless:
+// 
+//    // instructions go here
+//    la	s1, str		    //Load addresses of pointers to array heads
+//    la	s2, COUNT
+//    lw s3, 0(s2)
+loop_begin:
+//    lb s4, 0(s1)
+//
+//    beqz s4, DONE 	// Go to DONE
+//    nop
+//
+//    addu s3, s3, 1	    // value at s3 COUNT++
+//    addiu s1, s1, 1	    //str[i++] one byte
+//    j	loop_begin
+//    nop
+//
+//DONE:
+//    sw	s3, 0(s2)	    //Store value at COUNT
+   bne t4, zero, loop_begin
+
+endless:
        j endless
        nop
        
