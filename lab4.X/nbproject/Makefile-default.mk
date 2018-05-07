@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=main1.c
+SOURCEFILES_QUOTED_IF_SPACED=main3.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main1.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/main1.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main3.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/main3.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/main1.o
+OBJECTFILES=${OBJECTDIR}/main3.o
 
 # Source Files
-SOURCEFILES=main1.c
+SOURCEFILES=main3.c
 
 
 CFLAGS=
@@ -106,18 +106,18 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/main1.o: main1.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/main3.o: main3.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main1.o.d 
-	@${RM} ${OBJECTDIR}/main1.o 
-	@${FIXDEPS} "${OBJECTDIR}/main1.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -DSimulator=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main1.o.d" -o ${OBJECTDIR}/main1.o main1.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD) 
+	@${RM} ${OBJECTDIR}/main3.o.d 
+	@${RM} ${OBJECTDIR}/main3.o 
+	@${FIXDEPS} "${OBJECTDIR}/main3.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -DSimulator=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main3.o.d" -o ${OBJECTDIR}/main3.o main3.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD) 
 	
 else
-${OBJECTDIR}/main1.o: main1.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/main3.o: main3.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main1.o.d 
-	@${RM} ${OBJECTDIR}/main1.o 
-	@${FIXDEPS} "${OBJECTDIR}/main1.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main1.o.d" -o ${OBJECTDIR}/main1.o main1.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD) 
+	@${RM} ${OBJECTDIR}/main3.o.d 
+	@${RM} ${OBJECTDIR}/main3.o 
+	@${FIXDEPS} "${OBJECTDIR}/main3.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main3.o.d" -o ${OBJECTDIR}/main3.o main3.c    -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD) 
 	
 endif
 

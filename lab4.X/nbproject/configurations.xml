@@ -12,7 +12,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>main1.c</itemPath>
+      <itemPath>main3.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -168,6 +168,9 @@
         <property key="save-temps" value="false"/>
         <property key="wpo-lto" value="false"/>
       </C32Global>
+      <Simulator>
+        <property key="periphADC1.minTacq" value="132"/>
+      </Simulator>
     </conf>
   </confs>
 </configurationDescriptor>
