@@ -9,7 +9,7 @@
  
 .data
 
-   Hat: .word 0xffffffff
+   Hat: .word ':'
    MyArray: .space 16
    MyVar: .word 0x1234abcd
    MyByte: .byte 0xff
@@ -18,10 +18,11 @@
 // stored in volatile RAM memory
 // 
 .text
-//.macro push reg
-//    addiu sp, sp, -4
-//    sw  \reg, 0(sp)
-//.endm
+.macro push2 reg, reg1
+    addiu sp, sp, -8
+    sw \reg, 4(sp)
+    sw  \reg1, 0(sp)
+.endm
 // 
 //.macro pop reg
 //    lw \reg, 0(sp)
@@ -37,6 +38,34 @@
 //   
 .ent main
 main:
+
+la t0, Hat
+lw t1, 0(t0)
+//andi t2, t1, 0x00000008
+//li t2, 0x00000040	//Question 3
+//li t1, 0x00000208	//Quesion 4
+//xor t3, t1, t2
+//bnez t2, TURN
+//nop
+//sw t3, 0(t0)
+
+DIGIT_CHECK:
+li t3, 0x30
+sltu t5, t3, t1
+beqz t5, FAIL
+nop
+li t2, 0x39
+sltu t5, t2, t1
+bnez t5, FAIL
+nop
+
+
+TURN:
+    addi t1, t1, 0
+
+FAIL:
+push2 t1,t2
+// fail stuff here
 // 
 //    // instructions go here
 //    la	s1, str		    //Load addresses of pointers to array heads
@@ -55,7 +84,7 @@ loop_begin:
 //
 //DONE:
 //    sw	s3, 0(s2)	    //Store value at COUNT
-   bne t4, zero, loop_begin
+   //bne t4, zero, loop_begin
 
 endless:
        j endless
