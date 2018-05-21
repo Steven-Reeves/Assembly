@@ -28,7 +28,7 @@
 .data
 // data segment for READ/WRITE data follows here
 // stored in volatile RAM memory
-in_string:  .asciiz "string here"
+in_string:  .asciiz "1234567890r"
 string_buffer: .space 11
 
 str_0:	    .asciiz "Number of 0's: "
@@ -69,42 +69,116 @@ main:
     addu fp, zero, sp		    // move fp to sp
 
     
-    la t0, in_string		    // load address of in_string
-    lb a0, 0(t0)		    // load character
-    jal is_a_digit
+    la s0, in_string		    // load address of in_string
+string_loop:
+    lb a0, 0(s0)		    // load character
+    beqz a0, string_done	    // if character == 0, string is over
+    nop
+    jal is_a_digit		    // determine if byte is a digit
+    nop
+    beq v0, 0xffffffff, digit_end   // if not digit, skip to end.
+    nop
+		    // if digit, which one? store in correct location in stack
+    beq v0, 0x00000000, digit_0	    // if 0, add to stack frame and move on
+    nop
+    beq v0, 0x00000001, digit_1	    // if 1, add to stack frame and move on
+    nop
+    beq v0, 0x00000002, digit_2	    // if 2, add to stack frame and move on
+    nop
+    beq v0, 0x00000003, digit_3	    // if 3, add to stack frame and move on
+    nop
+    beq v0, 0x00000004, digit_4	    // if 4, add to stack frame and move on
+    nop
+    beq v0, 0x00000005, digit_5	    // if 5, add to stack frame and move on
+    nop
+    beq v0, 0x00000006, digit_6	    // if 6, add to stack frame and move on
+    nop
+    beq v0, 0x00000007, digit_7    // if 7, add to stack frame and move on
+    nop
+    beq v0, 0x00000008, digit_8	    // if 8, add to stack frame and move on
+    nop
+    beq v0, 0x00000009, digit_9	    // if 9, add to stack frame and move on
+    nop
+digit_0:
+    lw t7, 16(sp)		    // load value at count_0
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 16(sp)		    // store value at count_0
+    j digit_end			    // jump to end
+    nop
+digit_1:
+    lw t7, 20(sp)		    // load value at count_1
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 20(sp)		    // store value at count_1
+    j digit_end			    // jump to end
+    nop
+digit_2:
+    lw t7, 24(sp)		    // load value at count_2
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 24(sp)		    // store value at count_2
+    j digit_end			    // jump to end
+    nop
+digit_3:
+    lw t7, 28(sp)		    // load value at count_3
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 28(sp)		    // store value at count_3
+    j digit_end			    // jump to end
+    nop
+digit_4:
+    lw t7, 32(sp)		    // load value at count_4
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 32(sp)		    // store value at count_4
+    j digit_end			    // jump to end
+    nop
+digit_5:
+    lw t7, 36(sp)		    // load value at count_5
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 36(sp)		    // store value at count_5
+    j digit_end			    // jump to end
+    nop
+digit_6:
+    lw t7, 40(sp)		    // load value at count_6
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 40(sp)		    // store value at count_6
+    j digit_end			    // jump to end
+    nop
+digit_7:
+    lw t7, 44(sp)		    // load value at count_7
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 44(sp)		    // store value at count_7
+    j digit_end			    // jump to end
+    nop
+digit_8:
+    lw t7, 48(sp)		    // load value at count_8
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 48(sp)		    // store value at count_8
+    j digit_end			    // jump to end
+    nop
+digit_9:
+    lw t7, 52(sp)		    // load value at count_9
+    addiu t7, t7, 1		    // add 1 to value
+    sw t7, 52(sp)		    // store value at count_9
+    j digit_end			    // jump to end
+    nop
+digit_end:
+    addiu s0, s0, 1		    //increment pointer to s0
+    jal string_loop
     nop
     
-    // read a byte
-    // determing if byte is a digit
-    // if digit, which one? store in correct location in stack
-    // traverse through string 
-
-    la a0, 0(t0)
-    // output string wants an ADDRESS
-    jal output_string
+    
+string_done:
+    lw a0, 52(sp)		    // load number of 9's
+    la a1, string_buffer
+    jal binary_to_asciidec
     nop
-   			    
-    outer_loop:
-	
-    outer_done:
+   
+    la a0, string_buffer
+    jal output_string		// output string wants an ADDRESS
+    nop
+   			
+    //PART 3 here...
+    
 
-
- //Lab 5/12
-    //la t0, ACTUAL_NUMBER	// <-- ACTUAL_NUMBER (loading)
-//    lw s0, 0(t0)
-    //push zero			// this is our 'stop now' on the stack
-    //Divide the contents of Reg.File[Rs] by Reg.File[Rt], 
-    //treating both operands as unsigned values. Store the 
-    //quotient in the LOW register, and store the remainder 
-    //in the HIGH register. example: divu Rs, Rt
-//    li t1, 10
-//    divu s0, t1
-//    mflo t2
-//    mfhi t3
-    //next;
-    //push the digits onto the stack
-    //add some logic for determining that you're done
-    //output the result to the UART1  
+// Loop for debugging
 endless:
 j endless
 nop
@@ -168,7 +242,7 @@ li t1, 0x39
 bgt a0, t1, not_a_digit
 nop
 // is a digit
-addiu v0, a0, -30
+addiu v0, a0, -48	// not -30, -30 in hex is -48!
 j unwind_stack1
 nop
 
@@ -187,5 +261,47 @@ nop
     
 .ent binary_to_asciidec
 binary_to_asciidec:
+//room for fp, s0 - 
+    addiu sp, sp, -12	    // save 3 things
+    sw fp, 8(sp)	    // store fp
+    addu fp, zero, sp	    // save frame pointer
+    sw a1, 16(fp)	    // preserve a1 register
+    sw a0, 12(fp)	    // preserve a0 register
+    sw s0, 0(fp)
+    sw s1, 4(fp)
+
+value_loop:
+    lw s0, 0(a0)		// crash here
+    li t5, 0
+    push t5			// this is our 'stop now' on the stack
+    //Divide the contents of Reg.File[Rs] by Reg.File[Rt], 
+    //treating both operands as unsigned values. Store the 
+    //quotient in the LOW register, and store the remainder 
+    //in the HIGH register. example: divu Rs, Rt
+    li t1, 10
+    divu s0, t1
+    mflo t2			    // quotient
+    mfhi t3			    // remainder <- digit to write
+    addiu t3, t3, 48		    // add 0x30 to t3
+    push t3			    // push to bottom 
+    addu a0, t2, zero		    // put quotient in a0
+    bnez a0, value_loop		    // if quotient != 0, keep looping
+    nop
+
+string_loop1:    
+    lw s1, 0(a1)		    // Crash here
+    pop s1			    // pop number onto string
+    beqz s1, string_done	    // if null terminator, we're done
+    nop
+    sw s1, 0(a1)		    // store ascii char in string
+    addiu a1, 1			    // move to next byte
+    j string_loop1
+    nop
     
+    lw s0, 0(fp)		// save s registers again
+    lw s1, 4(fp)
+    addu sp, fp, zero
+    lw fp, 12(sp)
+    addiu sp, sp, 16	// unwind stack
+ 
 .end binary_to_asciidec
