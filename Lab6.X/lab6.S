@@ -34,7 +34,7 @@
 .data
 // data segment for READ/WRITE data follows here
 // stored in volatile RAM memory
-input_string:  .asciiz "2534"
+input_string:  .asciiz "253"
 debug_string: .ascii "debug iteration: "
 guess_string: .ascii " guess: "
 // output strings
@@ -84,13 +84,27 @@ main:
     sw zero, var_n
 
 // Read ascii input, branch to endless if incorrect input.
-    la s0, input_string		    // load address of input_string
+    la a0, input_string		    // load address of input_string
+    jal asciidec_to_Bin
+    nop
 
-
+    // check for bad input
+    la t0, errno
+    lw t0, 0(t0)
+    li t1, 1
+    beq t0, t1, error_message_out
+    nop
 
 
     // Loop for debugging
 endless:
+    j endless
+    nop
+
+error_message_out:
+    la a0, output_invalid
+    jal output_string
+    nop
     j endless
     nop
 
@@ -101,6 +115,7 @@ endless:
 
     .end main
 
+// Example output:
 // debug iteration: 6 guess: 15
 // The isqrt of 253 is 15. Check: 15^2 = 225, 16^2 = 256.
 
@@ -149,14 +164,15 @@ addiu sp, sp, 16	// unwind stack
 asciidec_to_Bin:
 
 // Stack frame for asciidec_to_Bin
-    addiu sp, sp, -28		    // Allocate enough room for stack frame
-    sw ra, 24(sp)		    // store ra-main
-    sw fp, 20(sp)		    // store fp-main
+    addiu sp, sp, -32		    // Allocate enough room for stack frame
+    sw ra, 28(sp)		    // store ra-main
+    sw fp, 24(sp)		    // store fp-main
     addu fp, zero, sp		    // move fp to sp
-    sw a0, 28(fp)		    // we need this for calling is_a_digit
+    sw a0, 32(fp)		    // we need this for calling is_a_digit
+    sw s0, 16(fp)
     li t0, 1			    // WEIGHT to 1
-    sw t0, 16(fp)
-    addu v0, zero, zero
+    sw t0, 20(fp)
+    addu s0, a0, zero
     //Stack frame
     //ra-main
     //fp-main
@@ -168,33 +184,32 @@ asciidec_to_Bin:
 
     push zero			    //place zero onto the stack
     outer_loop_a2b:
-	lb t1, 0(a0)		    //pull the current character out of the string
-        beqz t1, done_looping_a2b   //if the current character is 0x00, stop looping
+	lb a0, 0(s0)		    //pull the current character out of the string
+        beqz a0, done_looping_a2b   //if the current character is 0x00, stop looping
 	nop
-    // check is_a_digit
+    // check is_a_digit	
 	jal is_a_digit
 	nop
 	//if failure code: 0xFFFFFFFF fail
 	li t0, 0xFFFFFFFF
 	beq t0, v0, it_broke
 	nop
-	lb t1, 0(a0)
-	push t1			    //place a *not* NULL onto the stack
-	addiu a0, a0, 1		    //move to the next byte in the string
+	push v0			    //place a *not* NULL onto the stack
+	addiu s0, s0, 1		    //move to the next byte in the string
 	j outer_loop_a2b	    //if we got here, we didnt hit a NULL - loop again		    
 	nop
     done_looping_a2b:
+    addu v0, zero, zero
     start_calculating_a2b:
 	pop t1
 	beqz t1, totally_done
 	nop
-	addiu t1, t1, -0x30
-	lw t2, 16(fp)		    // <-- WEIGHT (loading)
+	lw t2, 20(fp)		    // <-- WEIGHT (loading)
 	mul t3, t1, t2
 	addu v0, v0, t3		    // <-- input number
 	li t6, 10
 	mul t2, t2, t6		    // weight = weight*10
-	sw t2, 16(fp)		    // --> WEIGHT (storing)
+	sw t2, 20(fp)		    // --> WEIGHT (storing)
 	j start_calculating_a2b
 	nop
     it_broke:
@@ -205,9 +220,10 @@ asciidec_to_Bin:
 
     //unwind stack frame
     addu sp, zero, fp
-    lw ra, 24(sp)
-    lw fp, 20(sp)
-    addiu sp, sp, 28
+    lw s0, 16(fp)
+    lw ra, 28(sp)
+    lw fp, 24(sp)
+    addiu sp, sp, 32
 
     jr ra
     nop
@@ -227,7 +243,6 @@ binary_to_asciidec:
     sw fp, 0(sp)	    // store fp
     addu fp, sp, zero	    // save frame pointer
 
-// in class example
     push zero
 loop2:
     div a0, 10		    // MFLO is quotient
