@@ -9,9 +9,9 @@
 
 // can use C-like macro define statements
 // #define statements follow here
-#define var_guess 24(fp)
-#define var_m 20(fp)
-#define var_n 16(fp)
+//#define var_guess 24(fp)
+//#define var_m 20(fp)
+//#define var_n 16(fp)
 
 .macro pop dst
     lw \dst, 0(sp)	    //pull the 'top' of the stack into a register
@@ -35,14 +35,16 @@
 // data segment for READ/WRITE data follows here
 // stored in volatile RAM memory
 input_string:  .asciiz "253"
-debug_string: .ascii "debug iteration: "
-guess_string: .ascii " guess: "
+debug_string: .asciiz "debug iteration: "
+guess_string: .asciiz " guess: "
+string_buffer: .space 11
 // output strings
 output_invalid: .asciiz "Invalid input. Program terminated! \r\n"
-output_string_1: .ascii "The isqrt of "
-output_string_2: .ascii " is "
-output_string_3: .ascii ". Check: "
-output_squared: .ascii "^2 = "
+output_string_1: .asciiz "The isqrt of "
+output_string_2: .asciiz " is "
+output_string_3: .asciiz ". Check: "
+output_string_4: .asciiz ", "
+output_squared: .asciiz "^2 = "
 ender:	    .asciiz ".\r\n"
 
 errno: .word 0
@@ -54,17 +56,14 @@ errno: .word 0
 .ent main
 main:
 // Stack frame for main
-    addiu sp, sp, -36		    // Allocate enough room for stack frame
-    sw ra, 32(sp)		    // store ra
-    sw fp, 28(sp)		    // store fp
+    addiu sp, sp, -24		    // Allocate enough room for stack frame
+    sw ra, 12(sp)		    // store ra
+    sw fp, 16(sp)		    // store fp
     addu fp, zero, sp		    // move fp to sp
 
     //Stack frame
     //ra
     //fp
-    //var_guess
-    //var_m
-    //var_n
     //a3
     //a2
     //a1
@@ -78,11 +77,6 @@ main:
     li t0, 0x1400
     sw t0, 0(t9)
 
-// set variables to 0
-    sw zero, var_guess
-    sw zero, var_m
-    sw zero, var_n
-
 // Read ascii input, branch to endless if incorrect input.
     la a0, input_string		    // load address of input_string
     jal asciidec_to_Bin
@@ -95,8 +89,97 @@ main:
     beq t0, t1, error_message_out
     nop
 
+// No error, so use Isqrt
+    addu a0, v0, zero		
+    addu s0, a0, zero		    // save intital value
+    jal Isqrt
+    nop
 
-    // Loop for debugging
+    addu s1, v0, zero
+    addi s2, s1, 0x1
+
+    mul s3, s1, s1		    // t0 = v0^2		    
+    mul s4, s2, s2		    // t1 = (v0+1)^2
+
+
+// Output final string
+    la a0, output_string_1	    // "The isqrt of "
+    jal output_string
+    nop
+
+    addu a0, s0, zero		    // load s0
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s0
+    jal output_string
+    nop
+    
+    la a0, output_string_2	    // " is "
+    jal output_string
+    nop
+
+    addu a0, s1, zero		    // load s1
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s1
+    jal output_string
+    nop
+
+    la a0, output_string_3	    // ". Check: "
+    jal output_string
+    nop
+
+    addu a0, s1, zero		    // load s1
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s1
+    jal output_string
+    nop
+
+    la a0, output_squared	    // "^2 = "
+    jal output_string
+    nop
+
+    addu a0, s3, zero		    // load s3
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s3
+    jal output_string
+    nop
+
+    la a0, output_string_4	    // ", "
+    jal output_string
+    nop
+
+    addu a0, s2, zero		    // load s2
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s2
+    jal output_string
+    nop
+
+    la a0, output_squared	    // "^2 = "
+    jal output_string
+    nop
+
+    addu a0, s4, zero		    // load s4
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+    la a0, string_buffer	    // print s4
+    jal output_string
+    nop
+
+    la a0, ender		    // ".\r\n"
+    jal output_string
+    nop
+
+// Loop for debugging
 endless:
     j endless
     nop
@@ -109,9 +192,9 @@ error_message_out:
     nop
 
     addu sp, fp, zero		// unwind stack
-    lw ra, 32(sp)		
-    lw fp, 28(sp)
-    addiu sp, sp, 36
+    lw ra, 12(sp)		
+    lw fp, 16(sp)
+    addiu sp, sp, 24
 
     .end main
 
@@ -232,7 +315,105 @@ asciidec_to_Bin:
 
 .ent Isqrt
 Isqrt:
-    //Implement this
+
+//Basic algorithm
+//guess = n / 2;
+//do {
+//prev_guess = guess;
+//guess = (prev_guess + n / prev_guess) / 2;
+//} while (prev_guess - guess > 1);
+
+// Stack frame allocation
+    addiu sp, sp, -40		    // save room for 10 things
+    sw ra, 36(sp)
+    sw fp, 32(sp)
+    sw a0, 0(fp)
+    addu fp, sp, zero
+    sw zero, 16(fp)		    //current_guess =0
+    sw a0, 20(fp)		    //prev_guess = current value
+    addu v0, a0, zero
+    sw zero, 24(fp)		    //n = 0
+    sw a0, 28(fp)		    //x = main value
+
+    lw t0, 20(fp)
+
+    beqz t0, isqrt_done		    //check for 0
+    nop
+    li t1, 0x1
+    beq t0, t1, isqrt_done	    //check for 1
+    nop
+    
+isqrt_loop:
+    lw t0, 24(fp)
+    addiu t0, t0, 0x1
+    sw t0, 24(fp)		    // n++
+    
+    lw t0, 20(fp)
+    srl t0, t0, 0x1		    // a0 / 2
+    sw t0, 16(fp)		    // current guess = a0 / 2
+    
+// print debug statement
+//debug_string: .ascii "debug iteration: "
+//guess_string: .ascii " guess: 
+    la a0, debug_string
+    jal output_string
+    nop
+
+    lw a0, 24(fp)		    // load n
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+
+    la a0, string_buffer
+    jal output_string
+    nop
+
+    la a0, guess_string
+    jal output_string
+    nop
+
+    lw a0, 16(fp)
+    la a1, string_buffer
+    jal binary_to_asciidec
+    nop
+
+    la a0, string_buffer
+    jal output_string
+    nop
+
+    la a0, ender
+    jal output_string
+    nop
+
+// evaluate result
+    lw t0, 16(fp)
+    sw t0, 20(fp)	    //prev_guess = current_guess
+    lw t0, 16(fp)	    // t0 = current_guess
+    lw t1, 28(fp)	    // t1 = x
+    lw t2, 20(fp)	    // t2 = prev_guess
+    divu t3, t1, t2	    // t3 = x/prev_guess
+    //mfhi t3		    // Not needed
+    addu t3, t2, t3	    // t3 = prev_guess + x / prev_guess
+    srl t3, 0x1		    // t3 = t3/2
+    sw t3, 16(fp)	    
+    
+    subu t4, t0, t3	    // t4 = t3 - t0
+    li t5, 0x1
+    bgt t4, t5, isqrt_loop
+    nop
+
+    lw v0, 16(fp)	    // result back to main
+    
+isqrt_done:
+// Stack frame unwinding
+    addu sp, fp, zero
+    lw ra, 36(sp)
+    lw fp, 32(sp)
+    addiu sp , sp, 40
+
+    jr ra
+    nop
+
 .end Isqrt
 
 .ent binary_to_asciidec
